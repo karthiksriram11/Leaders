@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaders – Faculty Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#F5C842;--silver:#C0C8D8;--bronze:#CD7F42;
+  --bg:#0A0C14;--card:#111520;--card2:#161B2E;
+  --border:#1E2540;--text:#E8ECF8;--muted:#6B75A0;
+  --accent:#5B8AF0;--accent2:#A06BF0;
+  --success:#4ADE80;--danger:#F87171;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(91,138,240,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(91,138,240,0.04) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
+.bg-orb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+.orb1{width:500px;height:500px;background:rgba(91,138,240,0.07);top:-150px;right:-150px}
+.orb2{width:400px;height:400px;background:rgba(160,107,240,0.06);bottom:-100px;left:-120px}
+.orb3{width:300px;height:300px;background:rgba(245,200,66,0.04);top:50%;left:50%;transform:translate(-50%,-50%)}
+
+.wrapper{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:0 20px 100px}
+
+/* ── Header ── */
+.site-header{text-align:center;padding:48px 0 28px}
+.site-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,10vw,96px);letter-spacing:6px;background:linear-gradient(135deg,#5B8AF0 0%,#A06BF0 50%,#F5C842 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.site-tagline{font-size:12px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-top:8px}
+.inst-pill{display:inline-flex;align-items:center;gap:8px;margin-top:16px;background:var(--card2);border:1px solid var(--border);border-radius:50px;padding:8px 22px;font-size:14px;color:var(--accent);cursor:pointer;transition:.2s;user-select:none}
+.inst-pill:hover{border-color:var(--accent);background:#1a2040}
+.inst-pill svg{width:13px;height:13px;opacity:.6;flex-shrink:0}
+
+/* ── Stats ── */
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;transition:.2s}
+.stat-card:hover{border-color:rgba(91,138,240,.3)}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;color:var(--accent);line-height:1}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+
+/* ── Add Section ── */
+.add-section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:20px}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.add-row{display:flex;gap:10px;flex-wrap:wrap}
+.add-row input{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:11px 15px;font-family:inherit;font-size:14px;outline:none;transition:.2s}
+.add-row input:focus{border-color:var(--accent);background:#111a30}
+.add-row input::placeholder{color:var(--muted)}
+#new-team-name{flex:2;min-width:170px}
+#new-pts{width:110px}
+.add-hint{margin-top:10px;font-size:12px;color:var(--muted)}
+.add-hint span{color:var(--accent);opacity:.8}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:11px 20px;border-radius:9px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:500;transition:.15s;white-space:nowrap;text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(91,138,240,.25)}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 6px 24px rgba(91,138,240,.35)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{background:var(--card2);border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn-reload{background:var(--card2);border:1px solid var(--border);color:var(--success);padding:11px 18px}
+.btn-reload:hover{border-color:var(--success);background:#0f1f18}
+.btn-danger-soft{background:var(--card2);border:1px solid #2a1515;color:var(--danger);padding:11px 18px}
+.btn-danger-soft:hover{background:#1f0f0f;border-color:var(--danger)}
+.spin svg{animation:spin .65s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Controls ── */
+.controls{display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap}
+.ctrl-input{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:11px 15px;font-family:inherit;font-size:14px;outline:none;transition:.2s;flex:1;min-width:160px}
+.ctrl-input:focus{border-color:var(--accent)}
+.ctrl-input::placeholder{color:var(--muted)}
+.ctrl-select{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:11px 15px;font-family:inherit;font-size:14px;outline:none;cursor:pointer;transition:.2s}
+.ctrl-select:focus{border-color:var(--accent)}
+
+/* ── Podium ── */
+.podium-wrap{margin-bottom:36px}
+.podium-label{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;color:var(--muted);text-align:center;margin-bottom:20px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:14px;padding:0 16px}
+.podium-slot{flex:1;max-width:210px;text-align:center}
+.podium-card{border-radius:12px 12px 0 0;display:flex;flex-direction:column;align-items:center;padding:20px 14px 22px;position:relative;margin-top:30px;transition:.3s}
+.podium-card:hover{transform:translateY(-4px)}
+.p1 .podium-card{height:170px;background:linear-gradient(180deg,rgba(245,200,66,.14) 0%,rgba(245,200,66,.04) 100%);border:1px solid rgba(245,200,66,.32);border-bottom:none;box-shadow:0 0 40px rgba(245,200,66,.07) inset}
+.p2 .podium-card{height:130px;background:linear-gradient(180deg,rgba(192,200,216,.11) 0%,rgba(192,200,216,.03) 100%);border:1px solid rgba(192,200,216,.25);border-bottom:none}
+.p3 .podium-card{height:110px;background:linear-gradient(180deg,rgba(205,127,66,.11) 0%,rgba(205,127,66,.03) 100%);border:1px solid rgba(205,127,66,.25);border-bottom:none}
+.podium-crown{position:absolute;top:-30px;font-size:22px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.pod-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;position:absolute;top:-28px;left:50%;transform:translateX(-50%);border:2px solid;transition:.3s}
+.p1 .pod-avatar{border-color:var(--gold)}
+.p2 .pod-avatar{border-color:var(--silver)}
+.p3 .pod-avatar{border-color:var(--bronze)}
+.pod-name{font-size:13px;font-weight:500;color:var(--text);margin-top:30px;word-break:break-word;line-height:1.3}
+.pod-pts{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-top:6px}
+.p1 .pod-pts{color:var(--gold)}
+.p2 .pod-pts{color:var(--silver)}
+.p3 .pod-pts{color:var(--bronze)}
+.pod-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
+.podium-step{height:6px;border-radius:0 0 6px 6px;margin:0 2px}
+.p1 .podium-step{background:rgba(245,200,66,.3)}
+.p2 .podium-step{background:rgba(192,200,216,.2)}
+.p3 .podium-step{background:rgba(205,127,66,.2)}
+.pod-empty .pod-avatar{opacity:.25;background:var(--card2);border-color:var(--border)}
+.pod-empty .pod-name{color:var(--muted);font-size:12px}
+.pod-empty .pod-pts{color:var(--muted);font-size:16px}
+
+/* ── List ── */
+.list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.list-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--muted)}
+.list-count{font-size:12px;color:var(--muted)}
+.lb-list{display:flex;flex-direction:column;gap:9px}
+.lb-row{background:var(--card);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;padding:15px 18px;gap:15px;transition:.2s;position:relative;overflow:hidden;cursor:default}
+.lb-row::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:0;transition:.2s}
+.lb-row:hover{border-color:rgba(91,138,240,.3);transform:translateX(4px);background:#131725}
+.lb-row:hover::after{opacity:1}
+.lb-row.r1{border-color:rgba(245,200,66,.22)}
+.lb-row.r1::after{background:var(--gold);opacity:.8}
+.lb-row.r2{border-color:rgba(192,200,216,.16)}
+.lb-row.r2::after{background:var(--silver);opacity:.6}
+.lb-row.r3{border-color:rgba(205,127,66,.16)}
+.lb-row.r3::after{background:var(--bronze);opacity:.6}
+.lb-rank{font-family:'Bebas Neue',sans-serif;font-size:20px;width:32px;text-align:center;flex-shrink:0;color:var(--muted)}
+.r1 .lb-rank{color:var(--gold)}
+.r2 .lb-rank{color:var(--silver)}
+.r3 .lb-rank{color:var(--bronze)}
+.lb-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;flex-shrink:0;border:1.5px solid}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.lb-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.lb-right{text-align:right;flex-shrink:0}
+.lb-pts{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;line-height:1;color:var(--text)}
+.r1 .lb-pts{color:var(--gold)}
+.r2 .lb-pts{color:var(--silver)}
+.r3 .lb-pts{color:var(--bronze)}
+.lb-ptsl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
+.lb-acts{display:flex;gap:6px;flex-shrink:0}
+.ab{background:none;border:1px solid var(--border);border-radius:7px;color:var(--muted);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:.15s;font-family:inherit}
+.ab:hover{border-color:var(--accent);color:var(--accent)}
+.ab.ab-add:hover{border-color:var(--success);color:var(--success)}
+.ab.ab-del:hover{border-color:var(--danger);color:var(--danger)}
+.bar-bg{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.04)}
+.bar-fg{height:100%;transition:width .7s cubic-bezier(.25,.46,.45,.94);border-radius:0 2px 2px 0}
+.r1 .bar-fg{background:linear-gradient(90deg,rgba(245,200,66,.4),var(--gold))}
+.r2 .bar-fg{background:linear-gradient(90deg,rgba(192,200,216,.3),var(--silver))}
+.r3 .bar-fg{background:linear-gradient(90deg,rgba(205,127,66,.3),var(--bronze))}
+.lb-row:not(.r1):not(.r2):not(.r3) .bar-fg{background:linear-gradient(90deg,rgba(91,138,240,.3),var(--accent))}
+
+/* ── Empty ── */
+.empty-state{text-align:center;padding:70px 20px;color:var(--muted)}
+.empty-icon{font-size:52px;margin-bottom:14px;opacity:.25}
+.empty-state p{font-size:14px;line-height:1.7}
+
+/* ── Footer ── */
+.lb-footer{text-align:center;margin-top:28px;font-size:12px;color:var(--muted);letter-spacing:.5px}
+
+/* ── Modal ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:30px;width:400px;max-width:92vw;position:relative}
+.modal h3{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:20px;color:var(--text)}
+.modal input{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:12px 15px;font-family:inherit;font-size:14px;outline:none;transition:.2s;margin-bottom:12px}
+.modal input:focus{border-color:var(--accent)}
+.modal input::placeholder{color:var(--muted)}
+.modal-acts{display:flex;gap:10px;margin-top:6px}
+.modal-acts .btn{flex:1;justify-content:center}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;transition:.15s}
+.modal-close:hover{color:var(--text)}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:13px 22px;font-size:14px;z-index:300;transform:translateY(90px);opacity:0;transition:.3s cubic-bezier(.34,1.56,.64,1);max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:rgba(74,222,128,.3);color:var(--success)}
+.toast.err{border-color:rgba(248,113,113,.3);color:var(--danger)}
+.toast.info{border-color:rgba(91,138,240,.3);color:var(--accent)}
+
+/* ── Responsive ── */
+@media(max-width:560px){
+  .lb-acts{display:none}
+  .lb-row:hover{transform:none}
+  .podium{gap:8px}
+  .add-row input{min-width:130px}
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+
+<div class="wrapper">
+
+  <!-- ── HEADER ── -->
+  <div class="site-header">
+    <div class="site-name">LEADERS</div>
+    <div class="site-tagline">Faculty Achievement Leaderboard</div>
+    <div class="inst-pill" id="inst-btn" title="Click to edit institution name">
+      <span id="inst-display">Your Institution</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+    </div>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div class="stats-bar">
+    <div class="stat-card"><div class="stat-val" id="s-teams">0</div><div class="stat-lbl">Teams</div></div>
+    <div class="stat-card"><div class="stat-val" id="s-pts">0</div><div class="stat-lbl">Total Points</div></div>
+    <div class="stat-card"><div class="stat-val" id="s-progs">0</div><div class="stat-lbl">Programs</div></div>
+    <div class="stat-card"><div class="stat-val" id="s-leader" style="font-size:18px;letter-spacing:0">—</div><div class="stat-lbl">Leader</div></div>
+  </div>
+
+  <!-- ── ADD POINTS ── -->
+  <div class="add-section">
+    <div class="section-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+      ADD / UPDATE POINTS
+    </div>
+    <div class="add-row">
+      <input type="text" id="new-team-name" placeholder="Team or faculty name…" autocomplete="off" spellcheck="false">
+      <input type="number" id="new-pts" placeholder="Points" min="1" value="10">
+      <button class="btn btn-primary" id="add-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Add
+      </button>
+    </div>
+    <div class="add-hint">Each program = <span>10 pts</span> &nbsp;·&nbsp; Entering an existing name <span>adds</span> to their score &nbsp;·&nbsp; <span>Enter ↵</span> to submit quickly</div>
+  </div>
+
+  <!-- ── CONTROLS ── -->
+  <div class="controls">
+    <input type="text" class="ctrl-input" id="search-inp" placeholder="🔍  Search teams…">
+    <select class="ctrl-select" id="sort-sel">
+      <option value="pts-desc">↓ Highest Points</option>
+      <option value="pts-asc">↑ Lowest Points</option>
+      <option value="az">A → Z</option>
+      <option value="za">Z → A</option>
+    </select>
+    <button class="btn btn-reload" id="reload-btn">
+      <svg id="ri" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="transition:.3s">
+        <path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.36-2.64M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.36 2.64"/><polyline points="21 3 21 9 15 9"/><polyline points="3 21 3 15 9 15"/>
+      </svg>
+      Reload
+    </button>
+    <button class="btn btn-danger-soft" id="clear-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      Clear All
+    </button>
+  </div>
+
+  <!-- ── PODIUM ── -->
+  <div class="podium-wrap">
+    <div class="podium-label">TOP 3 CHAMPIONS</div>
+    <div class="podium" id="podium"></div>
+  </div>
+
+  <!-- ── LEADERBOARD ── -->
+  <div class="list-header">
+    <div class="list-title">ALL RANKINGS</div>
+    <div class="list-count" id="list-count"></div>
+  </div>
+  <div class="lb-list" id="lb-list"></div>
+
+  <div class="lb-footer" id="lb-footer"></div>
+</div>
+
+<!-- ── EDIT MODAL ── -->
+<div class="overlay" id="edit-modal">
+  <div class="modal">
+    <button class="modal-close" id="edit-close">✕</button>
+    <h3 id="edit-title">Edit Team</h3>
+    <input type="text" id="edit-name" placeholder="Team name">
+    <input type="number" id="edit-pts" placeholder="Total points" min="0">
+    <div class="modal-acts">
+      <button class="btn btn-secondary" id="edit-cancel">Cancel</button>
+      <button class="btn btn-primary" id="edit-save">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── INSTITUTION MODAL ── -->
+<div class="overlay" id="inst-modal">
+  <div class="modal">
+    <button class="modal-close" id="inst-close">✕</button>
+    <h3>Institution Name</h3>
+    <input type="text" id="inst-inp" placeholder="e.g. Sri Ramakrishna College of Arts">
+    <div class="modal-acts">
+      <button class="btn btn-secondary" id="inst-cancel">Cancel</button>
+      <button class="btn btn-primary" id="inst-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const SK = 'leaders_v3';
+const IK = 'leaders_inst';
+
+let teams = [];
+let editId = null;
+let searchQ = '';
+let sortM = 'pts-desc';
+
+/* ── Storage ── */
+function loadData() {
+  try {
+    const d = localStorage.getItem(SK);
+    teams = d ? JSON.parse(d) : seed();
+  } catch(e) { teams = seed(); }
+  const inst = localStorage.getItem(IK);
+  if (inst) document.getElementById('inst-display').textContent = inst;
+}
+function saveData() {
+  try { localStorage.setItem(SK, JSON.stringify(teams)); } catch(e) {}
+}
+function seed() {
+  return [
+    { id: 1, name: 'Team Phoenix', points: 80 },
+    { id: 2, name: 'Team Nova',    points: 70 },
+    { id: 3, name: 'Team Orion',   points: 60 },
+    { id: 4, name: 'Team Ember',   points: 40 },
+    { id: 5, name: 'Team Vertex',  points: 30 },
+  ];
+}
+
+/* ── Helpers ── */
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])
+  );
+}
+function initials(n) {
+  return n.split(/\s+/).slice(0,2).map(w => w[0]||'').join('').toUpperCase() || '?';
+}
+const PALETTE = ['#5B8AF0','#A06BF0','#F5C842','#4ADE80','#F87171','#60A5FA','#F472B6','#34D399','#FB923C','#818CF8','#38BDF8','#A78BFA'];
+function avatarColor(name) {
+  let h = 0;
+  for (const c of name) { h = ((h << 5) - h) + c.charCodeAt(0); h |= 0; }
+  return PALETTE[Math.abs(h) % PALETTE.length];
+}
+function sorted(list) {
+  const c = [...list];
+  if (sortM === 'pts-desc') c.sort((a,b) => b.points - a.points);
+  else if (sortM === 'pts-asc') c.sort((a,b) => a.points - b.points);
+  else if (sortM === 'az')   c.sort((a,b) => a.name.localeCompare(b.name));
+  else                       c.sort((a,b) => b.name.localeCompare(a.name));
+  return c;
+}
+function filtered() {
+  if (!searchQ) return sorted(teams);
+  const q = searchQ.toLowerCase();
+  return sorted(teams.filter(t => t.name.toLowerCase().includes(q)));
+}
+function byRank() { return [...teams].sort((a,b) => b.points - a.points); }
+
+/* ── Render ── */
+function render() {
+  const ranked = byRank();
+  const list   = filtered();
+  const total  = teams.reduce((s,t) => s + t.points, 0);
+  const maxPts = ranked[0]?.points || 1;
+
+  // Stats
+  document.getElementById('s-teams').textContent  = teams.length;
+  document.getElementById('s-pts').textContent    = total;
+  document.getElementById('s-progs').textContent  = Math.floor(total / 10);
+  const ldr = ranked[0];
+  document.getElementById('s-leader').textContent = ldr ? ldr.name.split(' ').slice(0,2).join(' ') : '—';
+
+  // Podium  (order: 2nd | 1st | 3rd)
+  const pod = document.getElementById('podium');
+  const slots = [1, 0, 2];
+  const medals = ['🥇','🥈','🥉'];
+  const mColors = [getComputedStyle(document.documentElement).getPropertyValue('--gold').trim(),
+                   getComputedStyle(document.documentElement).getPropertyValue('--silver').trim(),
+                   getComputedStyle(document.documentElement).getPropertyValue('--bronze').trim()];
+  pod.innerHTML = '';
+  slots.forEach(idx => {
+    const t = ranked[idx];
+    const r = idx + 1;
+    const cl = ['p1','p2','p3'][idx];
+    const av = t ? avatarColor(t.name) : '#333';
+    const div = document.createElement('div');
+    div.className = `podium-slot ${cl}`;
+    if (t) {
+      div.innerHTML = `
+        <div class="podium-card">
+          ${r === 1 ? '<div class="podium-crown">👑</div>' : ''}
+          <div class="pod-avatar" style="background:${av}20;border-color:${av};color:${av}">${initials(t.name)}</div>
+          <div class="pod-name">${esc(t.name)}</div>
+          <div class="pod-pts">${t.points}</div>
+          <div class="pod-sub">POINTS</div>
+        </div>
+        <div class="podium-step"></div>`;
+    } else {
+      div.innerHTML = `
+        <div class="podium-card pod-empty">
+          <div class="pod-avatar">${r}</div>
+          <div class="pod-name">—</div>
+          <div class="pod-pts">—</div>
+        </div>
+        <div class="podium-step"></div>`;
+    }
+    pod.appendChild(div);
+  });
+
+  // Count
+  document.getElementById('list-count').textContent = `${list.length} of ${teams.length} teams`;
+
+  // List
+  const lb = document.getElementById('lb-list');
+  if (list.length === 0) {
+    lb.innerHTML = `<div class="empty-state"><div class="empty-icon">🏆</div><p>No teams match your search.<br>Add a team using the form above!</p></div>`;
+    document.getElementById('lb-footer').textContent = '';
+    return;
+  }
+  lb.innerHTML = '';
+  list.forEach((t, vi) => {
+    const globalRank = ranked.findIndex(x => x.id === t.id) + 1;
+    const pct = Math.round((t.points / maxPts) * 100);
+    const av  = avatarColor(t.name);
+    const rc  = globalRank <= 3 ? `r${globalRank}` : '';
+    const rnk = globalRank <= 3 ? ['🥇','🥈','🥉'][globalRank-1] : globalRank;
+    const row = document.createElement('div');
+    row.className = `lb-row ${rc}`;
+    row.innerHTML = `
+      <div class="lb-rank">${rnk}</div>
+      <div class="lb-av" style="background:${av}18;border-color:${av}50;color:${av}">${initials(t.name)}</div>
+      <div class="lb-info">
+        <div class="lb-name">${esc(t.name)}</div>
+        <div class="lb-meta">${t.points} pts &nbsp;·&nbsp; ${Math.floor(t.points/10)} programs completed</div>
+      </div>
+      <div class="lb-right">
+        <div class="lb-pts">${t.points}</div>
+        <div class="lb-ptsl">POINTS</div>
+      </div>
+      <div class="lb-acts">
+        <button class="ab ab-add" title="+10 pts" onclick="quickAdd(${t.id},10)">+10</button>
+        <button class="ab" title="Edit" onclick="openEdit(${t.id})">✏</button>
+        <button class="ab ab-del" title="Remove" onclick="removeTeam(${t.id})">✕</button>
+      </div>
+      <div class="bar-bg"><div class="bar-fg" style="width:${pct}%"></div></div>`;
+    lb.appendChild(row);
+  });
+
+  // Footer
+  const now = new Date();
+  document.getElementById('lb-footer').textContent =
+    `Last updated: ${now.toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})} at ${now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}`;
+}
+
+/* ── Actions ── */
+function addTeam() {
+  const nEl = document.getElementById('new-team-name');
+  const pEl = document.getElementById('new-pts');
+  const name = nEl.value.trim();
+  const pts  = parseInt(pEl.value) || 10;
+  if (!name) { toast('Enter a team name first', 'err'); nEl.focus(); return; }
+  if (pts <= 0) { toast('Points must be greater than 0', 'err'); pEl.focus(); return; }
+  const existing = teams.find(t => t.name.toLowerCase() === name.toLowerCase());
+  if (existing) {
+    existing.points += pts;
+    toast(`✓ ${existing.name} updated → ${existing.points} pts`, 'ok');
+  } else {
+    teams.push({ id: Date.now(), name, points: pts });
+    toast(`✓ ${name} added with ${pts} pts`, 'ok');
+  }
+  nEl.value = '';
+  pEl.value = 10;
+  saveData(); render();
+  nEl.focus();
+}
+
+function quickAdd(id, pts) {
+  const t = teams.find(x => x.id === id);
+  if (!t) return;
+  t.points += pts;
+  saveData(); render();
+  toast(`+${pts} → ${t.name} (${t.points} pts)`, 'ok');
+}
+
+function removeTeam(id) {
+  const t = teams.find(x => x.id === id);
+  if (!t) return;
+  if (!confirm(`Remove "${t.name}" from the leaderboard?`)) return;
+  teams = teams.filter(x => x.id !== id);
+  saveData(); render();
+  toast(`${t.name} removed`);
+}
+
+function openEdit(id) {
+  const t = teams.find(x => x.id === id);
+  if (!t) return;
+  editId = id;
+  document.getElementById('edit-title').textContent = 'Edit: ' + t.name;
+  document.getElementById('edit-name').value = t.name;
+  document.getElementById('edit-pts').value  = t.points;
+  document.getElementById('edit-modal').classList.add('open');
+  setTimeout(() => document.getElementById('edit-name').focus(), 60);
+}
+
+function saveEdit() {
+  const t = teams.find(x => x.id === editId);
+  if (!t) return;
+  const name = document.getElementById('edit-name').value.trim();
+  const pts  = parseInt(document.getElementById('edit-pts').value) || 0;
+  if (!name) { toast('Name cannot be empty', 'err'); return; }
+  t.name   = name;
+  t.points = pts;
+  closeEdit();
+  saveData(); render();
+  toast('Changes saved ✓', 'ok');
+}
+
+function closeEdit() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editId = null;
+}
+
+function clearAll() {
+  if (!confirm('Remove ALL teams and reset the leaderboard? This cannot be undone.')) return;
+  teams = [];
+  saveData(); render();
+  toast('Leaderboard cleared');
+}
+
+function doReload() {
+  const btn = document.getElementById('reload-btn');
+  const ico = document.getElementById('ri');
+  btn.disabled = true;
+  ico.style.animation = 'spin .65s linear infinite';
+  setTimeout(() => {
+    loadData(); render();
+    ico.style.animation = '';
+    btn.disabled = false;
+    toast('Leaderboard reloaded ✓', 'ok');
+  }, 650);
+}
+
+/* ── Toast ── */
+let toastTimer;
+function toast(msg, type = 'info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ── Institution ── */
+document.getElementById('inst-btn').addEventListener('click', () => {
+  document.getElementById('inst-inp').value = document.getElementById('inst-display').textContent;
+  document.getElementById('inst-modal').classList.add('open');
+  setTimeout(() => document.getElementById('inst-inp').focus(), 60);
+});
+function closeInst() { document.getElementById('inst-modal').classList.remove('open'); }
+document.getElementById('inst-cancel').addEventListener('click', closeInst);
+document.getElementById('inst-close').addEventListener('click', closeInst);
+document.getElementById('inst-save').addEventListener('click', () => {
+  const v = document.getElementById('inst-inp').value.trim();
+  if (!v) { toast('Name cannot be empty', 'err'); return; }
+  document.getElementById('inst-display').textContent = v;
+  localStorage.setItem(IK, v);
+  closeInst();
+  toast('Institution name saved ✓', 'ok');
+});
+
+/* ── Event Listeners ── */
+document.getElementById('add-btn').addEventListener('click', addTeam);
+document.getElementById('new-team-name').addEventListener('keydown', e => { if (e.key === 'Enter') addTeam(); });
+document.getElementById('new-pts').addEventListener('keydown', e => { if (e.key === 'Enter') addTeam(); });
+document.getElementById('reload-btn').addEventListener('click', doReload);
+document.getElementById('clear-btn').addEventListener('click', clearAll);
+document.getElementById('search-inp').addEventListener('input', e => { searchQ = e.target.value; render(); });
+document.getElementById('sort-sel').addEventListener('change', e => { sortM = e.target.value; render(); });
+document.getElementById('edit-save').addEventListener('click', saveEdit);
+document.getElementById('edit-cancel').addEventListener('click', closeEdit);
+document.getElementById('edit-close').addEventListener('click', closeEdit);
+document.getElementById('edit-name').addEventListener('keydown', e => { if (e.key === 'Enter') saveEdit(); });
+
+// Close modals on backdrop click
+['edit-modal','inst-modal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === document.getElementById(id)) {
+      document.getElementById(id).classList.remove('open');
+      if (id === 'edit-modal') editId = null;
+    }
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeEdit();
+    closeInst();
+  }
+});
+
+/* ── Init ── */
+loadData();
+render();
+</script>
+</body>
+</html>
